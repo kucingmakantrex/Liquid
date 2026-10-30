@@ -1,0 +1,36 @@
+name: Build HiOS Rounded Dock
+
+on:
+  push:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Ekstrak HiOSRoundedDock.zip
+        run: |
+          rm -rf proj && mkdir proj
+          unzip -q -o HiOSRoundedDock.zip -d proj
+          rm -rf proj/.github
+          ls -la proj
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 17
+
+      - uses: gradle/actions/setup-gradle@v3
+        with:
+          gradle-version: 8.7
+
+      - name: Build APK
+        working-directory: proj
+        run: gradle assembleDebug --no-daemon
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: HiOSRoundedDock
+          path: proj/app/build/outputs/apk/debug/*.apk
